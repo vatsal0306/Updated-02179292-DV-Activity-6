@@ -4,33 +4,26 @@ const height = 500;
 const m = 100;
 const n = 100;
 const binCount = 20; // Number of color bins
-
 const svg = d3.select("svg")
     .attr("width", width)
     .attr("height", height);
-
 // Initialize the values_density array for contours (Example)
 const values_density = new Array(m * n).fill(0).map(() => Math.random() * 100);
-
 // Set minValue and maxValue for the color scale
 const minValue = d3.min(values_density);
 const maxValue = d3.max(values_density);
-
 // Set up the color scale
 const colors = d3.scaleLinear()
     .domain(d3.range(minValue, maxValue, (maxValue - minValue) / binCount))
     .range(["#0d1a50", "#3e5eba", "#2b83ba", "#abdda4", "#ffffbf", "#fdae61", "#d7191c"])
     .interpolate(d3.interpolateHcl);
-
 // Set up the path generator for the contours
 const path = d3.geoPath();
-
 // Define the draw function
 function draw(binCount, minThreshold, maxThreshold) {
     const contours = d3.contours()
         .size([m, n])
         .thresholds(d3.range(minThreshold, maxThreshold, (maxThreshold - minThreshold) / binCount))(values_density);
-
     svg.append("g")
         .attr("class", "contours")
         .selectAll("path")
@@ -43,15 +36,12 @@ function draw(binCount, minThreshold, maxThreshold) {
         .attr("stroke-linejoin", "round")
         .attr("fill", d => colors(d.value));
 }
-
 // Define the update function for adjusting the contours based on new threshold values
 function update(minThreshold, maxThreshold) {
     svg.selectAll(".contours").remove(); // Remove the existing contours
-
     const contours = d3.contours()
         .size([m, n])
         .thresholds(d3.range(minThreshold, maxThreshold, (maxThreshold - minThreshold) / binCount))(values_density);
-
     svg.append("g")
         .attr("class", "contours")
         .selectAll("path")
@@ -64,23 +54,19 @@ function update(minThreshold, maxThreshold) {
         .attr("stroke-linejoin", "round")
         .attr("fill", d => colors(d.value));
 }
-
 // Set up the sliders for adjusting the threshold values
 const sliderMin = d3.select("#sliderMin");
 const sliderMax = d3.select("#sliderMax");
-
 // Event listeners to update the visualization when sliders are moved
 sliderMin.on("input", function() {
     const minThreshold = +sliderMin.property("value");
     const maxThreshold = +sliderMax.property("value");
     update(minThreshold, maxThreshold); // Update contours based on slider input
 });
-
 sliderMax.on("input", function() {
     const minThreshold = +sliderMin.property("value");
     const maxThreshold = +sliderMax.property("value");
     update(minThreshold, maxThreshold); // Update contours based on slider input
 });
-
 // Initialize with default threshold values
 draw(binCount, minValue, maxValue);
